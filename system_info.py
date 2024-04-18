@@ -18,7 +18,6 @@ class SystemInfoReporter:
     def __init__(self):
         self.all_cmd = " && printf \"\\n\" && ".join(
             [self.cpu_temp_cmd, self.cpu_usage_cmd, self.memory_usage_cmd, self.disk_usage_cmd])
-        print(self.all_cmd)
 
     def get_data(self):
         output = check_output(self.all_cmd, shell=True).decode("ascii").split("\n")
