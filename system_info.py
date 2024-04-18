@@ -26,7 +26,7 @@ class SystemInfoReporter:
     _run = True
     _thread = None
 
-    def __init__(self, update_delay_ms=500):
+    def __init__(self, update_delay_ms=5000):
         self.update_delay_ms = update_delay_ms
         self.all_cmd = " && printf \"\\n\" && ".join(self.CMDS)
 
