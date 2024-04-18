@@ -67,4 +67,4 @@ class SystemInfoReporter:
     def _update_cycle(self):
         while self._run:
             self._current_data = self._get_data()
-            time.sleep(self.update_delay_ms)
+            time.sleep(self.update_delay_ms / 1000)
