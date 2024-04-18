@@ -37,7 +37,6 @@ async function getSystemStatus() {
 }
 
 now = Date.now();
-console.log(now)
 const optionsLine = {
     chart: {
         height: 350, type: "line", stacked: true, animations: {
