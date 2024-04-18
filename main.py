@@ -5,6 +5,7 @@ import system_info
 
 app = FastAPI(default_response_class=ORJSONResponse)
 sys_reporter = system_info.SystemInfoReporter()
+sys_reporter.start()
 
 
 @app.get("/sysinfo")
