@@ -12,5 +12,6 @@ async function updateSystemStatus() {
     diskUsageP.innerText = `Disk Usage: ${info["disk_usage"]}GB`;
 }
 
+await updateSystemStatus();
 // Update the message every two seconds
 setInterval(updateSystemStatus, 5000);
