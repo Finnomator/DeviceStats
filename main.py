@@ -1,13 +1,14 @@
 from fastapi import FastAPI
+from fastapi.staticfiles import StaticFiles
+import system_info
 
 app = FastAPI()
+sys_reporter = system_info.SystemInfoReporter()
 
 
-@app.get("/")
-async def root():
-    return {"message": "Hello World"}
+@app.get("/sysinfo")
+async def system_status():
+    return sys_reporter.get_data().json()
 
 
-@app.get("/hello/{name}")
-async def say_hello(name: str):
-    return {"message": f"Hello {name}"}
+app.mount("/", StaticFiles(directory="static", html=True), name="static")
