@@ -7,7 +7,7 @@ window.Apex = {
         foreColor: "#fff", toolbar: {
             show: false
         }
-    }, colors: [cpuColor, memColor, cpuColor], stroke: {
+    }, colors: [cpuColor, memColor, diskColor], stroke: {
         width: 3
     }, dataLabels: {
         enabled: false
@@ -24,26 +24,35 @@ window.Apex = {
     }, tooltip: {
         theme: "dark"
     }, yaxis: {
-        decimalsInFloat: 2, opposite: true, labels: {
+        decimalsInFloat: 1, opposite: true, labels: {
             offsetX: -10
         }
     }
 };
 
+now = Date.now();
+
+function generatePast5Minutes() {
+    let data = []
+    for (let i = 60 * 5; i > 0; i--) {
+        data.push([now - i * 5000, 0])
+    }
+    return data
+}
 
 async function getSystemStatus() {
     const response = await fetch('/sysinfo');
     return await response.json();
 }
 
-now = Date.now();
 const optionsLine = {
     chart: {
-        height: 350, type: "line", stacked: true, animations: {
-            enabled: true, easing: "linear", dynamicAnimation: {
-                speed: 1000
-            }
-        }, dropShadow: {
+        height: 350,
+        type: "area",
+        animations: {
+            enabled: false,
+        },
+        dropShadow: {
             enabled: false
         }, toolbar: {
             show: false
@@ -63,21 +72,23 @@ const optionsLine = {
             size: 0
         }
     }, series: [{
-        name: "CPU Usage", data: []
+        name: "CPU Usage", data: generatePast5Minutes()
     }, {
-        name: "Memory Usage", data: []
+        name: "Memory Usage", data: generatePast5Minutes()
     }, {
-        name: "Disk Usage", data: []
+        name: "Disk Usage", data: generatePast5Minutes()
     }], xaxis: {
         type: "datetime"
+    }, yaxis: {
+        max: 100
     }, title: {
-        text: "24 Hours", align: "left", style: {
+        text: "Past 5 Minutes", align: "left", style: {
             fontSize: "12px"
         }
     }, legend: {
         show: true, floating: true, horizontalAlign: "left", onItemClick: {
             toggleDataSeries: false
-        }, position: "top", offsetY: -33, offsetX: 60
+        }, position: "top", offsetY: -38, offsetX: 100
     }
 };
 
@@ -189,7 +200,6 @@ const chartProgress3 = new ApexCharts(document.querySelector("#progress3"), opti
 chartProgress3.render();
 
 
-
 let xOffset = now;
 
 updateCharts();
@@ -207,11 +217,11 @@ async function updateCharts() {
 
 
     chartLine.updateSeries([{
-        data: [...chartLine.w.config.series[0].data, [xOffset, cpuUsage]]
+        data: [...chartLine.w.config.series[0].data.slice(-59), [xOffset, cpuUsage]]
     }, {
-        data: [...chartLine.w.config.series[1].data, [xOffset, memUsage]]
+        data: [...chartLine.w.config.series[1].data.slice(-59), [xOffset, memUsage]]
     }, {
-        data: [...chartLine.w.config.series[2].data, [xOffset, diskUsage]]
+        data: [...chartLine.w.config.series[2].data.slice(-59), [xOffset, diskUsage]]
     }]);
 
     xOffset += 5000;
