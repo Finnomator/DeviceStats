@@ -1,9 +1,6 @@
 const mainDiv = document.getElementById("main");
 
-const cpuColor = "#31afcb"
-const memColor = "#758cef"
-const diskColor = "#218a8a"
-const colors = [cpuColor, memColor, diskColor]
+const colors = ["#31afcb", "#7f55c9", "#758cef", "#218a8a"]
 const labels = ["CPU Usage", "Memory Usage", "Disk Usage"]
 
 window.Apex = {
@@ -11,7 +8,7 @@ window.Apex = {
         foreColor: "#fff", toolbar: {
             show: false
         }
-    }, colors: [cpuColor, memColor, diskColor], stroke: {
+    }, colors: colors, stroke: {
         width: 3
     }, dataLabels: {
         enabled: false
@@ -37,22 +34,11 @@ window.Apex = {
 
 async function checkOnlineStatus(ip, onlineStatusDiv, piHoleOnlineStatusSpan) {
     const reachable = await fetch(`http://${ip}`, {method: "HEAD"})
-        .then(() => {
-            return true;
-        })
-        .catch(() => {
-            return false;
-        });
-    const piHoleReachable = await fetch(`http://${ip}/admin/api.php` ,  {method: "HEAD" })
-        .then(response => {
-            console.log(response.status)
-            return response.ok || response.status === 401;
-        })
-        .catch(error => {
-            console.log(error)
-            return false;
-        });
-
+        .then(() => true)
+        .catch(() => false);
+    const piHoleReachable = await fetch(`http://${ip}/admin/api.php`, {method: "HEAD"})
+        .then(response => response.ok || response.status === 401)
+        .catch(() => false);
     onlineStatusDiv.style.backgroundColor = reachable ? "#07cb07" : "#d20707"
     piHoleOnlineStatusSpan.style.backgroundColor = piHoleReachable ? "#07cb07" : "#d20707"
 }
@@ -68,6 +54,7 @@ async function main() {
 
         const lineChartId = `lineChart${i}`
         const progressChartIds = [`progress${i}0`, `progress${i}1`, `progress${i}2`]
+        const tempChartIds = [`temp${i}0`]
         const onlineStatusId = `onlineStatus${i}`
         const piHoleOnlineStatusId = `piHoleOnlineStatus${i}`
 
@@ -76,6 +63,7 @@ async function main() {
         piData[ip]["piHoleOnlineStatusId"] = piHoleOnlineStatusId
         piData[ip]["lineChartId"] = lineChartId
         piData[ip]["progressChartIds"] = progressChartIds
+        piData[ip]["tempChartsIds"] = tempChartIds
 
         mainDiv.innerHTML += `<details>
         <summary>
@@ -87,6 +75,11 @@ async function main() {
         </summary>
 
         <div class="col">
+            <div class="box mt-4">
+                <div class="mt-4">
+                    <div id="${tempChartIds[0]}"></div>
+                </div>
+            </div>
             <div class="box mt-4">
                 <div class="mt-4">
                     <div id="${progressChartIds[0]}"></div>
@@ -108,17 +101,18 @@ async function main() {
     for (const ip of Object.keys(piData)) {
         piData[ip]["lineChart"] = createLineChart(piData[ip]["lineChartId"])
         piData[ip]["progressCharts"] = createProgressCharts(piData[ip]["progressChartIds"], labels, colors)
+        piData[ip]["tempCharts"] = createProgressCharts(piData[ip]["tempChartsIds"], ["CPU Temperature"], [colors[1]])
         piData[ip]["onlineStatus"] = document.getElementById(piData[ip]["onlineStatusId"])
         piData[ip]["piHoleOnlineStatus"] = document.getElementById(piData[ip]["piHoleOnlineStatusId"])
     }
 
     for (const ip of Object.keys(piData)) {
-        await updateCharts(ip, piData[ip]["progressCharts"], piData[ip]["lineChart"], piData[ip]["onlineStatus"])
+        await updateCharts(ip, piData[ip]["progressCharts"], piData[ip]["tempCharts"], piData[ip]["lineChart"])
         await checkOnlineStatus(ip, piData[ip]["onlineStatus"], piData[ip]["piHoleOnlineStatus"])
     }
     window.setInterval(function () {
         for (const ip of Object.keys(piData)) {
-            updateCharts(ip, piData[ip]["progressCharts"], piData[ip]["lineChart"])
+            updateCharts(ip, piData[ip]["progressCharts"], piData[ip]["tempCharts"], piData[ip]["lineChart"])
             checkOnlineStatus(ip, piData[ip]["onlineStatus"], piData[ip]["piHoleOnlineStatus"])
         }
     }, 5000)

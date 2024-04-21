@@ -34,10 +34,12 @@ function createLineChart(chartId) {
         }, series: [{
             name: "CPU Usage", data: generatePast5Minutes()
         }, {
+            name: "CPU Temperature", data: generatePast5Minutes()
+        }, {
             name: "Memory Usage", data: generatePast5Minutes()
         }, {
             name: "Disk Usage", data: generatePast5Minutes()
-        }], xaxis: {
+        },], xaxis: {
             type: "datetime"
         }, yaxis: {
             max: 100
@@ -116,21 +118,16 @@ function setProgressOptions(chart, progress, subtitle) {
     });
 }
 
-async function updateCharts(ip, progressCharts, chartLine) {
+async function updateCharts(ip, progressCharts, tempCharts, chartLine) {
 
     let error = false
-    const response = await getSystemStatus(ip).catch(
-        e => {
-            error = true;
-        }
-    );
+    const response = await getSystemStatus(ip).catch(() => error = true);
 
-    if (error || !response.ok) {
-        return
-    }
+    if (error || !response.ok) return
 
     const status = await response.json()
     const cpuUsage = status["cpu_usage"]
+    const cpuTemp = status["cpu_temp"]
     const memUsage = status["used_memory"] / status["total_memory"] * 100;
     const diskUsage = status["used_disk"] / status["total_disk"] * 100;
 
@@ -138,13 +135,17 @@ async function updateCharts(ip, progressCharts, chartLine) {
     setProgressOptions(progressCharts[1], memUsage, `${status["used_memory"]}/${status["total_memory"]}MB`);
     setProgressOptions(progressCharts[2], diskUsage, `${status["used_disk"]}/${status["total_disk"]}GB`);
 
+    setProgressOptions(tempCharts[0], cpuTemp, `${cpuTemp}°C`)
+
     const series = chartLine.w.config.series
 
     chartLine.updateSeries([{
         data: [...series[0].data.slice(-59), [series[0].data[series[0].data.length - 1][0] + 5000, cpuUsage]]
     }, {
-        data: [...series[1].data.slice(-59), [series[1].data[series[1].data.length - 1][0] + 5000, memUsage]]
+        data: [...series[1].data.slice(-59), [series[1].data[series[1].data.length - 1][0] + 5000, cpuTemp]]
     }, {
-        data: [...series[2].data.slice(-59), [series[2].data[series[2].data.length - 1][0] + 5000, diskUsage]]
+        data: [...series[2].data.slice(-59), [series[2].data[series[2].data.length - 1][0] + 5000, memUsage]]
+    }, {
+        data: [...series[3].data.slice(-59), [series[3].data[series[3].data.length - 1][0] + 5000, diskUsage]]
     }]);
 }
