@@ -4,12 +4,12 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
 
 import system_info
+import secrets
 
 app = FastAPI(default_response_class=ORJSONResponse)
 sys_reporter = system_info.SystemInfoReporter()
 sys_reporter.start()
 
-PIS = {"Pi 1": "127.0.0.1"}
 
 app.add_middleware(
     CORSMiddleware,
@@ -27,7 +27,7 @@ def system_status():
 
 @app.get("/available-pis")
 def available_pis():
-    return PIS
+    return secrets.PI_IPS
 
 
 app.mount("/", StaticFiles(directory="static", html=True), name="static")
