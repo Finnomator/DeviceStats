@@ -1,57 +1,75 @@
 body {
-  background: #1b1e23;
-  color: #ffffff;
-  font-family: Montserrat, Arial, sans-serif;
+    background: #1b1e23;
+    color: #ffffff;
+    font-family: Montserrat, Arial, sans-serif;
 }
 
 .body-bg {
-  background: #F3F4FA !important;
+    background: #F3F4FA !important;
 }
 
 h1, h2, h3, h4, h5, h6, strong {
-  font-weight: 600;
-  margin: auto;
-  padding: 10px;
+    font-weight: 600;
+    margin: auto;
+    padding: 10px;
 }
 
 .box .apexcharts-xaxistooltip {
-  background: #1B213B;
-  color: #fff;
+    background: #1B213B;
+    color: #fff;
 }
 
 .content-area {
-  max-width: 1280px;
-  margin: 0 auto;
+    max-width: 1280px;
+    margin: 0 auto;
 }
 
 .box {
-  background-color: #272c30;
-  padding: 25px 25px; 
-  border-radius: 4px; 
+    background-color: #272c30;
+    padding: 25px 25px;
+    border-radius: 4px;
 }
 
 .col {
-  padding: 15px;
+    padding: 15px;
 }
 
 .columnbox {
-  padding-right: 15px;
+    padding-right: 15px;
 }
+
 .radialbox {
-  max-height: 333px;
-  margin-bottom: 60px;
+    max-height: 333px;
+    margin-bottom: 60px;
 }
 
 .apexcharts-legend-series tspan:nth-child(3) {
-  font-weight: bold;
-  font-size: 20px;
+    font-weight: bold;
+    font-size: 20px;
 }
 
 .edit-on-codepen {
-  text-align: right;
-  width: 100%;
-  padding: 0 20px 40px;
-  position: relative;
-  top: -30px;
-  cursor: pointer;
+    text-align: right;
+    width: 100%;
+    padding: 0 20px 40px;
+    position: relative;
+    top: -30px;
+    cursor: pointer;
+}
+
+details > summary img.icon {
+    transform: rotate(-90deg);
+    transition: all 0.3s;
+}
+
+details[open] summary img.icon {
+    transform: rotate(0deg);
+}
+
+summary {
+    height: 64px;
+    font-size: 32px;
+    align-items: center;
+    display: flex;
+    cursor: pointer;
 }

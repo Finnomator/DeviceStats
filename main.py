@@ -9,6 +9,7 @@ app = FastAPI(default_response_class=ORJSONResponse)
 sys_reporter = system_info.SystemInfoReporter()
 sys_reporter.start()
 
+PIS = {"Pi 1": "127.0.0.1"}
 
 app.add_middleware(
     CORSMiddleware,
@@ -18,9 +19,15 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+
 @app.get("/sysinfo")
 def system_status():
     return sys_reporter.get_data()
+
+
+@app.get("/available-pis")
+def available_pis():
+    return PIS
 
 
 app.mount("/", StaticFiles(directory="static", html=True), name="static")

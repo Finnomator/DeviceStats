@@ -1,6 +1,10 @@
-cpuColor = "#31afcb"
-memColor = "#758cef"
-diskColor = "#218a8a"
+const mainDiv = document.getElementById("main");
+
+const cpuColor = "#31afcb"
+const memColor = "#758cef"
+const diskColor = "#218a8a"
+const colors = [cpuColor, memColor, diskColor]
+const labels = ["CPU Usage", "Memory Usage", "Disk Usage"]
 
 window.Apex = {
     chart: {
@@ -30,216 +34,94 @@ window.Apex = {
     }
 };
 
-now = Date.now();
 
-function generatePast5Minutes() {
-    let data = []
-    for (let i = 60 * 5; i > 0; i--) {
-        data.push([now - i * 5000, 0])
-    }
-    return data
+async function checkOnlineStatus(ip, onlineStatusDiv, piHoleOnlineStatusSpan) {
+    const reachable = await fetch(`http://${ip}`, {method: "HEAD"})
+        .then(() => {
+            return true;
+        })
+        .catch(() => {
+            return false;
+        });
+    const piHoleReachable = await fetch(`http://${ip}/admin/api.php` ,  {method: "HEAD" })
+        .then(response => {
+            console.log(response.status)
+            return response.ok || response.status === 401;
+        })
+        .catch(error => {
+            console.log(error)
+            return false;
+        });
+
+    onlineStatusDiv.style.backgroundColor = reachable ? "#07cb07" : "#d20707"
+    piHoleOnlineStatusSpan.style.backgroundColor = piHoleReachable ? "#07cb07" : "#d20707"
 }
 
-async function getSystemStatus() {
-    const response = await fetch('/sysinfo');
-    return await response.json();
+
+async function main() {
+
+    const resp = await fetch("/available-pis").catch()
+    const piIps = await resp.json()
+
+    let piData = {}
+    Object.entries(piIps).forEach(function ([name, ip], i) {
+
+        const lineChartId = `lineChart${i}`
+        const progressChartIds = [`progress${i}0`, `progress${i}1`, `progress${i}2`]
+        const onlineStatusId = `onlineStatus${i}`
+        const piHoleOnlineStatusId = `piHoleOnlineStatus${i}`
+
+        piData[ip] = {}
+        piData[ip]["onlineStatusId"] = onlineStatusId
+        piData[ip]["piHoleOnlineStatusId"] = piHoleOnlineStatusId
+        piData[ip]["lineChartId"] = lineChartId
+        piData[ip]["progressChartIds"] = progressChartIds
+
+        mainDiv.innerHTML += `<details>
+        <summary>
+            <img alt="Pi" class="icon" height="55px" src="assets/imgs/raspberry-pi.svg" style="padding: 10px">
+            <div id="${onlineStatusId}" style="width: 20px; height: 20px; background-color: grey; margin: 10px; border-radius: 20px"></div>
+            ${name}
+            <span id="${piHoleOnlineStatusId}" style="padding: 3px 10px 3px 10px;font-size: 20px; background-color: grey; border-radius: 20px; margin-left: 20px">Pi Hole</span>
+            <span style="margin-left: auto; margin-right: 10px">${ip}</span>
+        </summary>
+
+        <div class="col">
+            <div class="box mt-4">
+                <div class="mt-4">
+                    <div id="${progressChartIds[0]}"></div>
+                </div>
+                <div class="mt-4">
+                    <div id="${progressChartIds[1]}"></div>
+                </div>
+                <div class="mt-4">
+                    <div id="${progressChartIds[2]}"></div>
+                </div>
+            </div>
+            <div class="box mt-4">
+                <div id="${lineChartId}"></div>
+            </div>
+        </div>
+      </details>`
+    })
+
+    for (const ip of Object.keys(piData)) {
+        piData[ip]["lineChart"] = createLineChart(piData[ip]["lineChartId"])
+        piData[ip]["progressCharts"] = createProgressCharts(piData[ip]["progressChartIds"], labels, colors)
+        piData[ip]["onlineStatus"] = document.getElementById(piData[ip]["onlineStatusId"])
+        piData[ip]["piHoleOnlineStatus"] = document.getElementById(piData[ip]["piHoleOnlineStatusId"])
+    }
+
+    for (const ip of Object.keys(piData)) {
+        await updateCharts(ip, piData[ip]["progressCharts"], piData[ip]["lineChart"], piData[ip]["onlineStatus"])
+        await checkOnlineStatus(ip, piData[ip]["onlineStatus"], piData[ip]["piHoleOnlineStatus"])
+    }
+    window.setInterval(function () {
+        for (const ip of Object.keys(piData)) {
+            updateCharts(ip, piData[ip]["progressCharts"], piData[ip]["lineChart"])
+            checkOnlineStatus(ip, piData[ip]["onlineStatus"], piData[ip]["piHoleOnlineStatus"])
+        }
+    }, 5000)
 }
 
-const optionsLine = {
-    chart: {
-        height: 350,
-        type: "area",
-        animations: {
-            enabled: false,
-        },
-        dropShadow: {
-            enabled: false
-        }, toolbar: {
-            show: false
-        }, zoom: {
-            enabled: false
-        }
-    }, dataLabels: {
-        enabled: false
-    }, stroke: {
-        curve: "straight", width: 1
-    }, grid: {
-        padding: {
-            left: 0, right: 0
-        }
-    }, markers: {
-        size: 0, hover: {
-            size: 0
-        }
-    }, series: [{
-        name: "CPU Usage", data: generatePast5Minutes()
-    }, {
-        name: "Memory Usage", data: generatePast5Minutes()
-    }, {
-        name: "Disk Usage", data: generatePast5Minutes()
-    }], xaxis: {
-        type: "datetime"
-    }, yaxis: {
-        max: 100
-    }, title: {
-        text: "Past 5 Minutes", align: "left", style: {
-            fontSize: "12px"
-        }
-    }, legend: {
-        show: true, floating: true, horizontalAlign: "left", onItemClick: {
-            toggleDataSeries: false
-        }, position: "top", offsetY: -38, offsetX: 100
-    }
-};
-
-const chartLine = new ApexCharts(document.querySelector("#linechart"), optionsLine);
-chartLine.render();
-const optionsProgress1 = {
-    chart: {
-        height: 70, type: "bar", stacked: true, sparkline: {
-            enabled: true
-        }
-    }, plotOptions: {
-        bar: {
-            horizontal: true, barHeight: "20%", colors: {
-                backgroundBarColors: ["#40475D"]
-            }
-        }
-    }, colors: [cpuColor], stroke: {
-        width: 0
-    }, series: [{
-        name: "CPU Usage", data: [0]
-    }], title: {
-        floating: true, offsetX: -10, offsetY: 5, text: "CPU Usage"
-    }, subtitle: {
-        floating: true, align: "right", offsetY: 0, text: "Awaiting...", style: {
-            fontSize: "20px"
-        }
-    }, tooltip: {
-        enabled: false
-    }, xaxis: {
-        categories: ["CPU Usage"]
-    }, yaxis: {
-        max: 100
-    }, fill: {
-        type: "full"
-    }
-};
-
-const chartProgress1 = new ApexCharts(document.querySelector("#progress1"), optionsProgress1);
-chartProgress1.render();
-
-const optionsProgress2 = {
-    chart: {
-        height: 70, type: "bar", stacked: true, sparkline: {
-            enabled: true
-        }
-    }, plotOptions: {
-        bar: {
-            horizontal: true, barHeight: "20%", colors: {
-                backgroundBarColors: ["#40475D"]
-            }
-        }
-    }, colors: [memColor], stroke: {
-        width: 0
-    }, series: [{
-        name: "Memory Usage", data: [0]
-    }], title: {
-        floating: true, offsetX: -10, offsetY: 5, text: "Memory Usage"
-    }, subtitle: {
-        floating: true, align: "right", offsetY: 0, text: "Awaiting...", style: {
-            fontSize: "20px"
-        }
-    }, tooltip: {
-        enabled: false
-    }, xaxis: {
-        categories: ["Memory Usage"]
-    }, yaxis: {
-        max: 100
-    }, fill: {
-        type: "full"
-    }
-};
-
-const chartProgress2 = new ApexCharts(document.querySelector("#progress2"), optionsProgress2);
-chartProgress2.render();
-
-const optionsProgress3 = {
-    chart: {
-        height: 70, type: "bar", stacked: true, sparkline: {
-            enabled: true
-        }
-    }, plotOptions: {
-        bar: {
-            horizontal: true, barHeight: "20%", colors: {
-                backgroundBarColors: ["#40475D"]
-            }
-        }
-    }, colors: [diskColor], stroke: {
-        width: 0
-    }, series: [{
-        name: "Disk Usage", data: [0]
-    }], fill: {
-        type: "full"
-    }, title: {
-        floating: true, offsetX: -10, offsetY: 5, text: "Disk Usage"
-    }, subtitle: {
-        floating: true, align: "right", offsetY: 0, text: "Awaiting...", style: {
-            fontSize: "20px"
-        }
-    }, tooltip: {
-        enabled: false
-    }, xaxis: {
-        categories: ["Disk Usage"]
-    }, yaxis: {
-        max: 100
-    },
-};
-
-const chartProgress3 = new ApexCharts(document.querySelector("#progress3"), optionsProgress3);
-chartProgress3.render();
-
-
-let xOffset = now;
-
-updateCharts();
-window.setInterval(updateCharts, 5000);
-
-async function updateCharts() {
-    const status = await getSystemStatus();
-    const cpuUsage = status["cpu_usage"]
-    const memUsage = status["used_memory"] / status["total_memory"] * 100;
-    const diskUsage = status["used_disk"] / status["total_disk"] * 100;
-
-    setProgressOptions(chartProgress1, cpuUsage);
-    setProgressOptions(chartProgress2, memUsage);
-    setProgressOptions(chartProgress3, diskUsage);
-
-
-    chartLine.updateSeries([{
-        data: [...chartLine.w.config.series[0].data.slice(-59), [xOffset, cpuUsage]]
-    }, {
-        data: [...chartLine.w.config.series[1].data.slice(-59), [xOffset, memUsage]]
-    }, {
-        data: [...chartLine.w.config.series[2].data.slice(-59), [xOffset, diskUsage]]
-    }]);
-
-    xOffset += 5000;
-
-}
-
-function setProgressOptions(chart, progress) {
-    if (typeof progress === 'number' && !isNaN(progress)) chart.updateOptions({
-        series: [{
-            data: [progress]
-        }], subtitle: {
-            text: Math.round(progress * 10) / 10 + "%"
-        }
-    }); else chart.updateOptions({
-        series: [{
-            data: [0]
-        }], subtitle: {
-            text: "Unavailable"
-        }
-    });
-}
+main()

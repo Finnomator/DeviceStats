@@ -3,50 +3,35 @@
 <head>
     <meta charset="UTF-8">
     <meta content="width=device-width, initial-scale=1" name="viewport">
-    <title>Main Pi</title>
+    <title>Pi Monitor</title>
     <link href='https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.2/css/bootstrap.min.css' rel='stylesheet'>
     <link href='https://fonts.googleapis.com/css?family=Montserrat' rel='stylesheet'>
     <link href="./style.css" rel="stylesheet">
-
+    <link href="favicon.svg" rel="icon">
 </head>
 <body>
 
-<div style="max-width: 1250px; margin-left: auto;  margin-right: auto; background-color: #353c41; box-shadow: 0 0 8px rgba(0,0,0,0.5)">
+<div id="main" style="max-width: 1250px; margin-left: auto;  margin-right: auto; background-color: #353c41; box-shadow: 0 0 8px rgba(0,0,0,0.5)">
     <header style="background-color: #272c30; padding-left: 15px">
         <a href="index.html" style="color: white; text-decoration: none">
             <div style="display: flex">
                 <div style="align-items: center; display: flex">
-                    <img alt="Logo" src="favicon.ico">
+                    <img src="favicon.svg" alt="Logo" height="40px">
                 </div>
                 <div>
-                    <h2>Main Pi</h2>
+                    <h2>Pi Monitor</h2>
                 </div>
             </div>
         </a>
     </header>
 
-    <div class="col">
-        <div class="box mt-4">
-            <div class="mt-4">
-                <div id="progress1"></div>
-            </div>
-            <div class="mt-4">
-                <div id="progress2"></div>
-            </div>
-            <div class="mt-4">
-                <div id="progress3"></div>
-            </div>
-        </div>
-        <div class="box  mt-4">
-            <div id="linechart"></div>
-        </div>
-    </div>
-
 </div>
 <!-- partial -->
 <script src='https://cdn.jsdelivr.net/npm/apexcharts'></script>
 <script src='https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.22.2/moment.min.js'></script>
-<script src="./script.js"></script>
+
+<script src="chart-tools.js"></script>
+<script src="script.js"></script>
 
 </body>
 </html>
