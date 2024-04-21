@@ -19,9 +19,6 @@ jobs:
           directory: 'static'
           output: 'static'
           add_suffix: false
-          inclusions: |-
-            .*assets.*
-            .*static/index.html
 
       - name: Commit changes
         run: |
