@@ -27,6 +27,7 @@ jobs:
         with:
           directory: 'static'
           output: 'static'
+          add_suffix: false
 
       - name: Commit and push minified files to production
         run: |
