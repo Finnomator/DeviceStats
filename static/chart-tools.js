@@ -1,6 +1,6 @@
 function generatePast5Minutes() {
     let data = []
-    const now = Date.now();
+    const now = new Date().getDate();
     for (let i = 60 * 5; i > 0; i--) {
         data.push([now - i * 5000, 0])
     }
@@ -139,13 +139,15 @@ async function updateCharts(ip, progressCharts, tempCharts, chartLine) {
 
     const series = chartLine.w.config.series
 
+    const now = new Date().getDate();
+
     chartLine.updateSeries([{
-        data: [...series[0].data.slice(-59), [series[0].data[series[0].data.length - 1][0] + 5000, cpuUsage]]
+        data: [...series[0].data.slice(-59), [now, cpuUsage]]
     }, {
-        data: [...series[1].data.slice(-59), [series[1].data[series[1].data.length - 1][0] + 5000, cpuTemp]]
+        data: [...series[1].data.slice(-59), [now, cpuTemp]]
     }, {
-        data: [...series[2].data.slice(-59), [series[2].data[series[2].data.length - 1][0] + 5000, memUsage]]
+        data: [...series[2].data.slice(-59), [now, memUsage]]
     }, {
-        data: [...series[3].data.slice(-59), [series[3].data[series[3].data.length - 1][0] + 5000, diskUsage]]
+        data: [...series[3].data.slice(-59), [now, diskUsage]]
     }]);
 }
