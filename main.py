@@ -31,7 +31,7 @@ def system_status():
 
 @app.get("/pihole-info")
 def pihole_info():
-    return request("GET", f"http://localhost:80/admin/api.php?auth={PIHOLE_API_KEY}&summaryRaw").text
+    return request("GET", f"http://localhost:80/admin/api.php?auth={PIHOLE_API_KEY}&summaryRaw").json()
 
 
 @app.get("/available-pis")
