@@ -31,14 +31,19 @@ window.Apex = {
     }
 };
 
-
 async function checkOnlineStatus(ip, onlineStatusDiv, piHoleOnlineStatusSpan) {
-    const reachable = await fetch(`http://${ip}`, {method: "HEAD"})
+
+    const controller = new AbortController()
+    const timeoutId = setTimeout(() => controller.abort(), 5000)
+    const reachable = await fetch(`http://${ip}`, {method: "HEAD", signal: controller.signal})
         .then(() => true)
         .catch(() => false);
-    const piHoleReachable = await fetch(`http://${ip}/admin/api.php`, {method: "HEAD"})
+    const piHoleReachable = await fetch(`http://${ip}/admin/api.php`, {method: "HEAD", signal: controller.signal})
         .then(response => response.ok || response.status === 401)
         .catch(() => false);
+
+    clearTimeout(timeoutId)
+
     onlineStatusDiv.style.backgroundColor = reachable ? "#07cb07" : "#d20707"
     piHoleOnlineStatusSpan.style.backgroundColor = piHoleReachable ? "#07cb07" : "#d20707"
 }
