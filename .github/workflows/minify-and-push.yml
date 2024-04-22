@@ -17,7 +17,8 @@ jobs:
 
       - name: Overwrite production branch with master
         run: |
-          git checkout production
+          git fetch
+          git switch production
           git reset --hard master
           git push --force origin production
 
