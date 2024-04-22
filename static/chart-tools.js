@@ -1,6 +1,6 @@
 function generatePast5Minutes() {
     let data = []
-    const now = new Date().getDate();
+    const now = Date.now();
     for (let i = 60 * 5; i > 0; i--) {
         data.push([now - i * 5000, 0])
     }
@@ -40,7 +40,21 @@ function createLineChart(chartId) {
         }, {
             name: "Disk Usage", data: generatePast5Minutes()
         },], xaxis: {
-            type: "datetime"
+            type: "datetime",
+            labels: {
+                formatter: function (value) {
+                    const currentDate = new Date(value);
+                    let hours = currentDate.getHours();
+                    let minutes = currentDate.getMinutes();
+                    let seconds = currentDate.getSeconds();
+
+                    hours = (hours < 10 ? "0" : "") + hours;
+                    minutes = (minutes < 10 ? "0" : "") + minutes;
+                    seconds = (seconds < 10 ? "0" : "") + seconds;
+
+                    return hours + ":" + minutes + ":" + seconds;
+                }
+            }
         }, yaxis: {
             max: 100
         }, title: {
@@ -139,7 +153,7 @@ async function updateCharts(ip, progressCharts, tempCharts, chartLine) {
 
     const series = chartLine.w.config.series
 
-    const now = new Date().getDate();
+    const now = Date.now();
 
     chartLine.updateSeries([{
         data: [...series[0].data.slice(-59), [now, cpuUsage]]
