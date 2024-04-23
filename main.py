@@ -11,7 +11,7 @@ import secrets
 PIHOLE_API_KEY = check_output("cat /etc/pihole/setupVars.conf | grep -o 'WEBPASSWORD=.*$' |cut -d '=' -f 2-",
                               shell=True).decode("ascii").strip()
 
-app = FastAPI(default_response_class=ORJSONResponse)
+app = FastAPI(default_response_class=ORJSONResponse, docs_url=None, redoc_url=None)
 sys_reporter = system_info.SystemInfoReporter()
 sys_reporter.start()
 
