@@ -57,15 +57,6 @@ h1, h2, h3, h4, h5, h6, strong {
     cursor: pointer;
 }
 
-details > summary img.icon {
-    transform: rotate(-90deg);
-    transition: all 0.3s;
-}
-
-details[open] summary img.icon {
-    transform: rotate(0deg);
-}
-
 summary {
     height: 64px;
     font-size: 32px;
