@@ -2,14 +2,9 @@ from fastapi import FastAPI
 from fastapi.responses import ORJSONResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
-from subprocess import check_output
-from requests import request
 
 import system_info
 import secrets
-
-PIHOLE_API_KEY = check_output("cat /etc/pihole/setupVars.conf | grep -o 'WEBPASSWORD=.*$' |cut -d '=' -f 2-",
-                              shell=True).decode("ascii").strip()
 
 app = FastAPI(default_response_class=ORJSONResponse, docs_url=None, redoc_url=None)
 sys_reporter = system_info.SystemInfoReporter()
@@ -29,14 +24,9 @@ def system_status():
     return sys_reporter.get_data()
 
 
-@app.get("/pihole-info")
-def pihole_info():
-    return request("GET", f"http://localhost:80/admin/api.php?auth={PIHOLE_API_KEY}&summaryRaw").json()
-
-
-@app.get("/available-pis")
+@app.get("/available-devices")
 def available_pis():
-    return secrets.PI_IPS
+    return secrets.DEVICE_IPS
 
 
 app.mount("/", StaticFiles(directory="static", html=True), name="static")

@@ -113,7 +113,9 @@ function createProgressCharts(chartIds, labels, colors) {
 }
 
 async function getSystemStatus(ip) {
-    return await fetch(`http://${ip}/sysinfo`)
+    let url = "/sysinfo";
+    if (ip !== "localhost") url = `http://${ip}${url}`
+    return await fetch(url)
 }
 
 function setProgressOptions(chart, progress, subtitle) {
