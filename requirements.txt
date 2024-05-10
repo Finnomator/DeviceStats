@@ -3,3 +3,4 @@ starlette~=0.37.2
 pydantic~=2.7.0
 requests~=2.31.0
 orjson
+uvicorn
