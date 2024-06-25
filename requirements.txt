@@ -1,7 +1,7 @@
 fastapi~=0.111.0
 starlette~=0.37.2
 pydantic~=2.7.4
-requests~=2.31.0
+requests~=2.32.3
 psutil~=5.9.8
 orjson
 uvicorn
