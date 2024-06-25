@@ -1,6 +1,6 @@
 fastapi~=0.111.0
 starlette~=0.37.2
-pydantic~=2.7.0
+pydantic~=2.7.4
 requests~=2.31.0
 psutil~=5.9.8
 orjson
